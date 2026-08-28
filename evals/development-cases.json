@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "base": {
+    "version": 1,
+    "task_id": "forge-eval",
+    "creativity": "C3",
+    "outcome": "deliver a compatible and recoverable feature",
+    "constraints": ["preserve public behavior"],
+    "non_goals": ["replace unrelated infrastructure"],
+    "signals": ["compatibility", "concurrency", "recovery"],
+    "candidates": [
+      {"id":"a","mechanism":"direct-state","summary":"change the semantic owner","tradeoffs":["small diff"],"status":"chosen","evidence":["best fit"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"isolate compatibility","tradeoffs":["extra boundary"],"status":"rejected","evidence":["unneeded indirection"],"wildcard":false},
+      {"id":"c","mechanism":"event-log","summary":"record transitions","tradeoffs":["migration cost"],"status":"rejected","evidence":["too broad"],"wildcard":false},
+      {"id":"d","mechanism":"constraint-solver","summary":"derive valid transitions","tradeoffs":["novel model"],"status":"rejected","evidence":["evidence cost"],"wildcard":true}
+    ],
+    "chosen_candidate": "a",
+    "decision_evidence": ["wins the explicit tournament"],
+    "requirements": [
+      {"id":"r1","outcome":"observable result","owner":"src/owner.py","invariant":"state remains valid","evidence":["focused test"]}
+    ],
+    "validation": [
+      {"lane":"adversarial","evidence":"mutation probe"},
+      {"lane":"behavior","evidence":"focused behavior test"},
+      {"lane":"compatibility","evidence":"contract test"},
+      {"lane":"concurrency","evidence":"race test"},
+      {"lane":"failure","evidence":"dependency failure test"},
+      {"lane":"recovery","evidence":"restart test"},
+      {"lane":"regression","evidence":"existing suite"},
+      {"lane":"simplification","evidence":"final complexity audit"}
+    ]
+  },
+  "cases": [
+    {"id":"ready-c3","patch":{},"expected":{"status":"READY"}},
+    {"id":"c3-no-wildcard","patch":{"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"c","mechanism":"events","summary":"c","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"d","mechanism":"queue","summary":"d","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false}
+    ],"chosen_candidate":"a"},"expected":{"status":"REVISE","missing_contains":["wildcard_candidate"]}},
+    {"id":"c3-too-few","patch":{"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"c","mechanism":"wild","summary":"c","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":true}
+    ],"chosen_candidate":"a"},"expected":{"status":"REVISE","missing_contains":["candidate_count:4","distinct_candidate_mechanisms:4"]}},
+    {"id":"fake-diversity","patch":{"candidates":[
+      {"id":"a","mechanism":"same","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":" SAME ","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"c","mechanism":"Same","summary":"c","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"d","mechanism":"same","summary":"d","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":true}
+    ],"chosen_candidate":"a"},"expected":{"status":"REVISE","missing_contains":["distinct_candidate_mechanisms:4"]}},
+    {"id":"missing-decision","patch":{"decision_evidence":[]},"expected":{"status":"REVISE","missing_contains":["decision_evidence"]}},
+    {"id":"missing-traceability","patch":{"requirements":[]},"expected":{"status":"REVISE","missing_contains":["requirement_traceability"]}},
+    {"id":"performance-lane","patch":{"signals":["performance"]},"expected":{"status":"REVISE","missing_contains":["validation:performance"]}},
+    {"id":"migration-lane","patch":{"signals":["migration"]},"expected":{"status":"REVISE","missing_contains":["validation:migration"]}},
+    {"id":"security-lane","patch":{"signals":["security"]},"expected":{"status":"REVISE","missing_contains":["validation:security"]}},
+    {"id":"compatibility-lane","patch":{"validation":[
+      {"lane":"adversarial","evidence":"x"},{"lane":"behavior","evidence":"x"},{"lane":"concurrency","evidence":"x"},{"lane":"failure","evidence":"x"},{"lane":"recovery","evidence":"x"},{"lane":"regression","evidence":"x"},{"lane":"simplification","evidence":"x"}
+    ]},"expected":{"status":"REVISE","missing_contains":["validation:compatibility"]}},
+    {"id":"concurrency-lane","patch":{"validation":[
+      {"lane":"adversarial","evidence":"x"},{"lane":"behavior","evidence":"x"},{"lane":"compatibility","evidence":"x"},{"lane":"failure","evidence":"x"},{"lane":"recovery","evidence":"x"},{"lane":"regression","evidence":"x"},{"lane":"simplification","evidence":"x"}
+    ]},"expected":{"status":"REVISE","missing_contains":["validation:concurrency"]}},
+    {"id":"recovery-lane","patch":{"validation":[
+      {"lane":"adversarial","evidence":"x"},{"lane":"behavior","evidence":"x"},{"lane":"compatibility","evidence":"x"},{"lane":"concurrency","evidence":"x"},{"lane":"failure","evidence":"x"},{"lane":"regression","evidence":"x"},{"lane":"simplification","evidence":"x"}
+    ]},"expected":{"status":"REVISE","missing_contains":["validation:recovery"]}},
+    {"id":"unknown-field","patch":{"surprise":true},"expected":{"status":"INVALID","findings_contains":["unknown capsule fields: surprise"]}},
+    {"id":"boolean-version","patch":{"version":true},"expected":{"status":"INVALID","findings_contains":["version must be integer 1"]}},
+    {"id":"unknown-creativity","patch":{"creativity":"C4"},"expected":{"status":"INVALID"}},
+    {"id":"duplicate-signals","patch":{"signals":["security","security"]},"expected":{"status":"INVALID","findings_contains":["signals must be unique"]}},
+    {"id":"unknown-signal","patch":{"signals":["magic"]},"expected":{"status":"INVALID","findings_contains":["unknown signals: magic"]}},
+    {"id":"chosen-reference-mismatch","patch":{"chosen_candidate":"b"},"expected":{"status":"INVALID","findings_contains":["chosen_candidate must reference the candidate with status chosen"]}},
+    {"id":"no-chosen-entry","patch":{"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false}
+    ],"chosen_candidate":"a"},"expected":{"status":"INVALID"}},
+    {"id":"duplicate-candidate-id","patch":{"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"a","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":true}
+    ],"chosen_candidate":"a"},"expected":{"status":"INVALID","findings_contains":["candidate ids must be unique"]}},
+    {"id":"duplicate-validation-lane","patch":{"validation":[
+      {"lane":"behavior","evidence":"x"},{"lane":"behavior","evidence":"y"}
+    ]},"expected":{"status":"INVALID","findings_contains":["validation lanes must be unique"]}},
+    {"id":"empty-owner","patch":{"requirements":[
+      {"id":"r1","outcome":"x","owner":"","invariant":"x","evidence":["x"]}
+    ]},"expected":{"status":"INVALID","findings_contains":["requirements[0].owner must be a non-empty string"]}},
+    {"id":"missing-rejection-evidence","patch":{"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":[],"wildcard":false},
+      {"id":"c","mechanism":"events","summary":"c","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"d","mechanism":"wild","summary":"d","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":true}
+    ],"chosen_candidate":"a"},"expected":{"status":"REVISE","missing_contains":["rejection_evidence:b"]}},
+    {"id":"ready-c0","patch":{"creativity":"C0","signals":[],"candidates":[
+      {"id":"a","mechanism":"mechanical","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false}
+    ],"chosen_candidate":"a","validation":[{"lane":"behavior","evidence":"x"}]},"expected":{"status":"READY","required_candidate_count":1}},
+    {"id":"ready-c1","patch":{"creativity":"C1","signals":[],"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false}
+    ],"chosen_candidate":"a","validation":[{"lane":"behavior","evidence":"x"},{"lane":"regression","evidence":"x"}]},"expected":{"status":"READY","required_candidate_count":2}},
+    {"id":"ready-c2","patch":{"creativity":"C2","signals":[],"candidates":[
+      {"id":"a","mechanism":"direct","summary":"a","tradeoffs":["x"],"status":"chosen","evidence":["x"],"wildcard":false},
+      {"id":"b","mechanism":"adapter","summary":"b","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false},
+      {"id":"c","mechanism":"events","summary":"c","tradeoffs":["x"],"status":"rejected","evidence":["x"],"wildcard":false}
+    ],"chosen_candidate":"a","validation":[{"lane":"behavior","evidence":"x"},{"lane":"failure","evidence":"x"},{"lane":"regression","evidence":"x"}]},"expected":{"status":"READY","required_candidate_count":3}}
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/ligong/development-capsule.schema.json",
+  "title": "Ligong ForgeLoop development capsule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version", "task_id", "creativity", "outcome", "constraints", "non_goals", "signals",
+    "candidates", "chosen_candidate", "decision_evidence", "requirements", "validation"
+  ],
+  "properties": {
+    "version": {"const": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "creativity": {"enum": ["C0", "C1", "C2", "C3"]},
+    "outcome": {"type": "string", "minLength": 1},
+    "constraints": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "non_goals": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "signals": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["compatibility", "concurrency", "migration", "performance", "recovery", "security"]}
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "mechanism", "summary", "tradeoffs", "status", "evidence", "wildcard"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "mechanism": {"type": "string", "minLength": 1},
+          "summary": {"type": "string", "minLength": 1},
+          "tradeoffs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "status": {"enum": ["chosen", "rejected"]},
+          "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "wildcard": {"type": "boolean"}
+        }
+      }
+    },
+    "chosen_candidate": {"type": "string", "minLength": 1},
+    "decision_evidence": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "outcome", "owner", "invariant", "evidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "outcome": {"type": "string", "minLength": 1},
+          "owner": {"type": "string", "minLength": 1},
+          "invariant": {"type": "string", "minLength": 1},
+          "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lane", "evidence"],
+        "properties": {
+          "lane": {"enum": ["adversarial", "behavior", "compatibility", "concurrency", "failure", "migration", "performance", "recovery", "regression", "security", "simplification"]},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

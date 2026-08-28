@@ -1,0 +1,6 @@
+interface:
+  display_name: "力工 SSS v4 · ForgeLoop"
+  short_description: "高创造性、风险自适应、可验证的软件开发交付"
+  default_prompt: "Use $ligong to develop this request with adaptive creativity, scoped implementation, and fresh verification."
+policy:
+  allow_implicit_invocation: true

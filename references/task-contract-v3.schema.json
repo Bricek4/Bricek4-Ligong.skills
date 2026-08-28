@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/ligong/task-contract-v3.schema.json",
+  "title": "TaskGuard Contract v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "task_id", "goal", "risk", "repo_contract", "actions"],
+  "properties": {
+    "version": {"const": 3},
+    "task_id": {"type": "string", "minLength": 1},
+    "goal": {"type": "string", "minLength": 1},
+    "risk": {"const": "L3"},
+    "repo_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "repo_scope", "acknowledge_dirty", "acceptance", "forbidden", "surfaces"],
+      "properties": {
+        "repo": {"type": "string", "minLength": 1},
+        "repo_scope": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "acknowledge_dirty": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "acceptance": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "argv", "cwd", "requires_red", "idempotent"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "argv": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+              "cwd": {"type": "string", "minLength": 1},
+              "selector": {"type": "string", "minLength": 1},
+              "requires_red": {"type": "boolean"},
+              "expected_red_pattern": {"type": ["string", "null"]},
+              "idempotent": {"type": "boolean"}
+            }
+          }
+        },
+        "forbidden": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "glob", "regex", "mode"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "glob": {"type": "string", "minLength": 1},
+              "regex": {"type": "string", "minLength": 1},
+              "mode": {"enum": ["eliminate", "no_new"]}
+            }
+          }
+        },
+        "surfaces": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "argv", "cwd", "read_only", "allowed_writes", "normalizer_version"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "argv": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+              "cwd": {"type": "string", "minLength": 1},
+              "read_only": {"const": true},
+              "allowed_writes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+              "normalizer_version": {"enum": ["json-v1", "text-v1"]}
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "adapter", "target", "environment", "resource_scope", "desired_state", "preconditions", "authority_policy", "plan_policy", "rollback_policy", "health_policy"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["deploy", "write", "update", "publish"]},
+          "adapter": {"type": "string", "minLength": 1},
+          "environment": {"enum": ["sandbox", "staging", "production"]},
+          "target": {
+            "type": "object", "additionalProperties": false,
+            "required": ["provider", "account_id", "project_id", "resource_id"],
+            "properties": {
+              "provider": {"type": "string", "minLength": 1},
+              "account_id": {"type": "string", "minLength": 1},
+              "project_id": {"type": "string", "minLength": 1},
+              "resource_id": {"type": "string", "minLength": 1}
+            }
+          },
+          "resource_scope": {"type": "object"},
+          "desired_state": {"type": "object"},
+          "preconditions": {"type": "object"},
+          "authority_policy": {
+            "type": "object", "additionalProperties": false,
+            "required": ["provider", "bind_plan", "max_uses"],
+            "properties": {"provider": {"type": "string", "minLength": 1}, "bind_plan": {"type": "boolean"}, "max_uses": {"type": "integer", "minimum": 1}}
+          },
+          "plan_policy": {
+            "type": "object", "additionalProperties": false,
+            "required": ["max_age_seconds"], "properties": {"max_age_seconds": {"type": "integer", "minimum": 1}}
+          },
+          "rollback_policy": {
+            "type": "object", "additionalProperties": false,
+            "required": ["required", "preauthorize", "automatic_on_health_failure"],
+            "properties": {"required": {"const": true}, "preauthorize": {"type": "boolean"}, "automatic_on_health_failure": {"type": "boolean"}}
+          },
+          "health_policy": {
+            "type": "object", "additionalProperties": false,
+            "required": ["window_seconds", "minimum_samples", "required_signals"],
+            "properties": {
+              "window_seconds": {"type": "integer", "minimum": 1},
+              "minimum_samples": {"type": "integer", "minimum": 1},
+              "required_signals": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+            }
+          }
+        }
+      }
+    }
+  }
+}
