@@ -1,12 +1,21 @@
 # 力工（Ligong）
 
-面向 Codex 的风险自适应软件工程执行 Skill：把口语化需求收敛为明确的目标、边界和验收证据，再根据实际影响选择轻量执行或 TaskGuard 合同闭环。
+面向 Codex 的风险自适应软件工程执行 Skill（AI agent / developer tool）：把口语化需求收敛为明确的目标、边界和验收证据，再根据实际影响选择轻量执行或 TaskGuard 合同闭环。
 
 力工适合修复 Bug、开发功能、安全删除、代码审查和复杂跨层修改。它重点处理开发任务中最容易被忽略的部分：保护已有改动、保持接口兼容、识别规则陷阱、隔离工作区，以及确认测试证据确实属于当前代码和当前任务。
 
 > 力工不是新的模型，也不会扩大 Codex 的权限。它是一套执行、风险控制和验证协议。
 
-[快速开始](#快速开始) · [使用示例](#使用示例) · [风险等级](#风险等级) · [TaskGuard](#taskguard) · [安全边界](#安全边界) · [参与开发](#参与开发)
+[快速开始](#快速开始) · [适用场景](#适用场景) · [使用示例](#使用示例) · [风险等级](#风险等级) · [TaskGuard](#taskguard) · [安全边界](#安全边界) · [参与开发](#参与开发)
+
+## 适用场景
+
+- 修复 Bug、开发功能、代码审查和复杂跨层修改；
+- 需要先收敛需求边界，再执行实现与验证的 AI 编程任务；
+- 涉及删除、权限、数据库或生产写入等高风险操作的受控流程；
+- 希望让验收证据、回滚边界和工作区状态可复核的团队协作。
+
+力工可以作为 Codex 的个人 Skill 使用，也可以作为项目内的工程流程参考。它不替代测试框架、权限系统或人工审批。
 
 ## 为什么使用力工
 
@@ -41,6 +50,23 @@ git clone https://github.com/Bricek4/Bricek4-Ligong.skills.git ~/.codex/skills/l
 如果 `~/.codex/skills/ligong` 已经存在，请先检查并备份其中的个人修改。不要通过递归删除覆盖未知内容。
 
 安装完成后，重新启动 Codex 或开启一个新任务，让 Skill 目录被重新发现。
+
+### 安装后验证
+
+在仓库根目录运行完整测试：
+
+```bash
+python3 scripts/run_tests.py
+```
+
+如果你已经有对应的 capsule 和 evidence 文件，也可以按需运行结构和发布门禁检查：
+
+```bash
+python3 scripts/forge_check.py path/to/capsule.json
+python3 scripts/run_v3_release_gates.py --evidence path/to/evidence.json --mode SHADOW
+```
+
+这两条命令需要各自的输入文件；只查看命令参数可运行 `--help`。它们只检查本地证据，不会修改项目文件或外部服务。
 
 ### 第一次调用
 
@@ -165,12 +191,6 @@ evals/                   风险和开发行为评测用例
 
 ## 参与开发
 
-在仓库根目录运行完整测试：
-
-```bash
-python3 scripts/run_tests.py
-```
-
 如果本机安装了 Codex 自带的 `skill-creator`，再验证 Skill 结构：
 
 ```bash
@@ -199,6 +219,6 @@ git pull --ff-only
 
 ## 许可证与项目归属
 
-当前仓库没有附带开源许可证。除非仓库所有者后续明确添加许可证，否则默认保留全部权利。
+本项目以 [MIT License](LICENSE) 发布。使用、修改和再分发时请保留许可证与版权声明。
 
 这是由社区维护的个人项目，不是 OpenAI 官方产品，也不代表 OpenAI 的认可或支持。Codex 和 OpenAI 是其各自权利人的名称或商标。
